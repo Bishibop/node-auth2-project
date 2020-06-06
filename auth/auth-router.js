@@ -15,6 +15,19 @@ function generateToken(user) {
   return jwt.sign(payload, secrets.jwtSecret, options);
 }
 
+router.post('/register', async (req, res) => {
+  const user = req.body;
+  const hash = bcrypt.hashSync(user.password, 8);
+  user.password = hash;
+
+  try {
+    const saved = await Users.add(user);
+    res.status(201).json(saved);
+  } catch (err) {
+    res.status(500).json(error);
+  }
+});
+
 router.post('/login', (req, res) => {
   let { username, password } = req.body;
 
