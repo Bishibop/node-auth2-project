@@ -1,3 +1,5 @@
+const bcryptjs = require('bcryptjs');
+const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const secrets = require('../config/secrets.js');
 
@@ -16,13 +18,14 @@ function generateToken(user) {
 }
 
 router.post('/register', async (req, res) => {
-  const user = req.body;
-  const hash = bcrypt.hashSync(user.password, 8);
-  user.password = hash;
+  const credentials = req.body;
+  const hash = bcrypt.hashSync(credentials.password, 8);
+  credentials.password = hash;
 
   try {
-    const saved = await Users.add(user);
-    res.status(201).json(saved);
+    const saved = await Users.add(credentials);
+    const token = generateToken(saved);
+    res.status(201).json({data: saved, token});
   } catch (err) {
     res.status(500).json(error);
   }
@@ -48,3 +51,5 @@ router.post('/login', (req, res) => {
       res.status(500).json(error);
     });
 });
+
+module.exports = router;
